@@ -7,34 +7,13 @@ Follow these steps to deploy the backend API to api.vinod.digital:
 1. All infrastructure must be deployed using Terraform
 2. GitHub repository must be set up at https://github.com/vinoddotcom/notes-back-end-services
 
-## Authentication Options
+## Authentication Setup
 
-You can use one of two authentication methods to connect GitHub Actions to AWS:
+The backend uses OIDC (OpenID Connect) authentication with GitHub Actions for secure, keyless authentication to AWS.
 
-### Option 1: IAM User with Access Keys (Standard Method)
+### Setting up OIDC Authentication
 
-1. Run the GitHub credentials script to get the IAM credentials:
-
-```bash
-./scripts/get_github_credentials.sh
-```
-
-2. Add the following secrets to the GitHub repository:
-   - `AWS_ACCESS_KEY_ID`: The IAM access key ID
-   - `AWS_SECRET_ACCESS_KEY`: The IAM secret access key
-   - `AWS_REGION`: ap-south-1
-
-You can use the GitHub CLI to set these secrets:
-
-```bash
-gh secret set AWS_ACCESS_KEY_ID -b "AKIAYRPLVFEHTYMJJF3W" --repo vinoddotcom/notes-back-end-services
-gh secret set AWS_SECRET_ACCESS_KEY -b "your-secret-key" --repo vinoddotcom/notes-back-end-services
-gh secret set AWS_REGION -b "ap-south-1" --repo vinoddotcom/notes-back-end-services
-```
-
-### Option 2: OIDC Authentication (Recommended Secure Method)
-
-1. Apply the Terraform configuration for OIDC:
+1. Apply the Terraform configuration for OIDC (if not already done):
 
 ```bash
 cd terraform
