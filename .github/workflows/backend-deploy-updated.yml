@@ -50,6 +50,9 @@ jobs:
     # needs: test
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # 🔥 required for OIDC
+      contents: read    # required for actions/checkout
 
     steps:
       - name: Checkout code
