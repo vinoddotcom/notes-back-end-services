@@ -32,5 +32,11 @@ def root():
 
 @app.get("/health", tags=["health"])
 def health_check():
-    """Health check endpoint for Kubernetes liveness and readiness probes"""
+    """Health check endpoint for load balancers and container health checks"""
     return {"status": "ok", "service": "notes-backend"}
+
+
+@app.get("/api/health", tags=["health"])
+def api_health_check():
+    """API health check endpoint for ECS container health checks"""
+    return {"status": "ok", "service": "notes-backend-api"}

@@ -98,6 +98,55 @@ alembic upgrade head
 python run.py
 ```
 
+## CI/CD Pipeline
+
+The application uses GitHub Actions for continuous integration and deployment to AWS.
+
+### GitHub Actions Workflow
+
+The CI/CD pipeline is configured in `.github/workflows/backend-deploy.yml` and performs the following steps:
+
+1. Run tests
+2. Build a Docker image
+3. Push the image to Amazon ECR
+4. Deploy to Amazon ECS
+5. Run database migrations
+
+### SSM Parameter Integration
+
+The workflow uses AWS SSM Parameter Store to retrieve information about deployed resources:
+
+- ECR repository URL
+- ECS cluster name
+- ECS service name
+- Task execution role ARN
+- Database secret ARN
+- VPC subnet IDs
+
+### Setting Up GitHub Secrets
+
+The following secrets need to be configured in your GitHub repository:
+
+1. `AWS_ACCESS_KEY_ID`: IAM user's access key ID
+2. `AWS_SECRET_ACCESS_KEY`: IAM user's secret access key
+3. `AWS_REGION`: AWS region (e.g., ap-south-1)
+
+Use the provided script to get IAM credentials:
+
+```bash
+./scripts/get_github_credentials.sh
+```
+
+### Deployment Validation
+
+To validate that all required SSM parameters are set up correctly:
+
+```bash
+./scripts/validate_ssm_params.sh
+```
+
+For more information on the CI/CD setup, see the [CI/CD Setup Documentation](./docs/cicd_setup.md).
+
 Or using uvicorn directly:
 
 ```bash
@@ -133,17 +182,27 @@ docker run -p 8000:8000 -e DATABASE_URL=postgres://user:pass@host/db -e SECRET_K
 This project uses GitHub Actions for CI/CD:
 
 1. When code is pushed to the main branch, the pipeline:
-   - Builds the application
    - Runs tests
    - Builds a Docker image
    - Pushes the image to AWS ECR
-   - Deploys to AWS EKS
+   - Deploys to AWS ECS
+   - Runs database migrations
 
-2. Required AWS secrets in GitHub:
+2. Authentication with AWS (two options):
+   
+   **Option 1: IAM User with Access Keys**
    - AWS_ACCESS_KEY_ID
    - AWS_SECRET_ACCESS_KEY
+   - AWS_REGION
+   
+   **Option 2: OIDC Authentication (Recommended)**
+   - AWS_ROLE_ARN
+   - AWS_REGION
 
 3. The pipeline status can be checked in the GitHub Actions tab.
+
+For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+For OIDC setup instructions, see [OIDC Setup Guide](./docs/oidc_setup.md).
 
 ## API Endpoints
 

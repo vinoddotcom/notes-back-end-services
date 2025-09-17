@@ -1,0 +1,69 @@
+{
+  "family": "notes-prod-backend",
+  "executionRoleArn": "${TASK_EXECUTION_ROLE}",
+  "taskRoleArn": "${TASK_ROLE}",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "backend",
+      "image": "${ECR_REPOSITORY}:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "hostPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "ENVIRONMENT",
+          "value": "production"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "${DB_SECRET_ARN}:database_url::"
+        },
+        {
+          "name": "SECRET_KEY",
+          "valueFrom": "${APP_SECRET_ARN}:secret_key::"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/notes-prod-backend",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:8000/api/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512",
+  "tags": [
+    {
+      "key": "Project",
+      "value": "notes"
+    },
+    {
+      "key": "Environment",
+      "value": "prod"
+    }
+  ]
+}
