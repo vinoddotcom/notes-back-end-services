@@ -9,7 +9,6 @@ echo "Creating test database..."
 
 echo "Installing dependencies..."
 pip install -r requirements.txt
-pip install -r test-requirements.txt
 
 echo "Running tests..."
 pytest -v
