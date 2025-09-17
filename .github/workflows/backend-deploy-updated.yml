@@ -54,7 +54,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       # Configure AWS credentials using OIDC authentication
       - name: Configure AWS credentials with OIDC
         uses: aws-actions/configure-aws-credentials@v2
@@ -62,7 +62,10 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActions-${{ github.run_id }}
-          audience: sts.amazonaws.com
+
+      # Debug AWS identity (to verify credentials are loaded correctly)
+      - name: Debug AWS identity
+        run: aws sts get-caller-identity
 
       - name: Get SSM Parameters
         id: ssm
