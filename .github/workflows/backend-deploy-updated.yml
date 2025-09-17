@@ -13,10 +13,6 @@ on:
       - '**.md'
   workflow_dispatch:
 
-permissions:
-  id-token: write
-  contents: read
-
 env:
   AWS_REGION: ap-south-1
   PROJECT_NAME: notes
@@ -59,13 +55,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install AWS CLI v2
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install -i /usr/local/aws-cli -b /usr/local/bin
-          aws --version
-
+      # Configure AWS credentials using OIDC authentication
       - name: Configure AWS credentials with OIDC
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -73,10 +63,9 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActions-${{ github.run_id }}
 
-      - name: "Debug: show AWS caller identity (should succeed)"
-        run: |
-          echo "AWS_REGION=$AWS_REGION"
-          aws sts get-caller-identity || (echo "Failed to call STS" && exit 1)
+      # Debug AWS identity (to verify credentials are loaded correctly)
+      - name: Debug AWS identity
+        run: aws sts get-caller-identity
 
       - name: Get SSM Parameters
         id: ssm
@@ -135,7 +124,7 @@ jobs:
           SECURITY_GROUP_ID=$(aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }} \
             --query 'services[0].networkConfiguration.awsvpcConfiguration.securityGroups[0]' --output text)
           echo "SECURITY_GROUP_ID=$SECURITY_GROUP_ID" >> $GITHUB_ENV
-
+          
       - name: Run database migrations
         run: |
           # Convert comma-separated subnet IDs to proper format for AWS CLI
