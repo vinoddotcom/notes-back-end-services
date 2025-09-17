@@ -60,7 +60,7 @@ fi
 echo -e "\n${GREEN}Repository found: $REPO_NAME${NC}"
 
 # Ask if Terraform should be applied
-read -p "Do you want to apply Terraform to create the OIDC provider and IAM role? (y/n): " APPLY_TERRAFORM
+read -p "Do you want to apply Terraform to update the OIDC configuration? (y/n): " APPLY_TERRAFORM
 
 if [[ "$APPLY_TERRAFORM" == "y" || "$APPLY_TERRAFORM" == "Y" ]]; then
     echo -e "\n${YELLOW}Applying Terraform configuration...${NC}"
@@ -108,6 +108,9 @@ echo ""
 echo "The following secrets have been set:"
 echo "- AWS_ROLE_ARN: $ROLE_ARN"
 echo "- AWS_REGION: $AWS_REGION"
+echo ""
+echo -e "${YELLOW}Note: AWS access keys are no longer used or needed. If you previously set${NC}"
+echo -e "${YELLOW}AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY secrets, you can safely remove them.${NC}"
 echo ""
 echo "To trigger the CI/CD pipeline, push changes to the main branch or use the GitHub Actions UI."
 echo ""
