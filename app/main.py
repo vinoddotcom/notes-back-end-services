@@ -25,6 +25,12 @@ app.include_router(notes.router, tags=["notes"])
 
 
 @app.get("/", tags=["health"])
-def health_check():
-    """Health check endpoint"""
+def root():
+    """Root endpoint"""
     return {"status": "ok", "message": "Notes API is running"}
+
+
+@app.get("/health", tags=["health"])
+def health_check():
+    """Health check endpoint for Kubernetes liveness and readiness probes"""
+    return {"status": "ok", "service": "notes-backend"}

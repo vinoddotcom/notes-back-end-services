@@ -50,6 +50,8 @@ A FastAPI-based REST API for a notes application with user authentication and ro
 
 - Python 3.8+
 - PostgreSQL
+- Docker (for containerization)
+- AWS CLI (for deployment)
 
 ### Installation
 
@@ -111,6 +113,37 @@ API documentation (Swagger UI) will be available at `http://localhost:8000/docs`
 ```bash
 pytest
 ```
+
+### Containerization
+
+Build the Docker image:
+
+```bash
+docker build -t notes-backend .
+```
+
+Run the container:
+
+```bash
+docker run -p 8000:8000 -e DATABASE_URL=postgres://user:pass@host/db -e SECRET_KEY=mysecretkey notes-backend
+```
+
+### CI/CD Pipeline
+
+This project uses GitHub Actions for CI/CD:
+
+1. When code is pushed to the main branch, the pipeline:
+   - Builds the application
+   - Runs tests
+   - Builds a Docker image
+   - Pushes the image to AWS ECR
+   - Deploys to AWS EKS
+
+2. Required AWS secrets in GitHub:
+   - AWS_ACCESS_KEY_ID
+   - AWS_SECRET_ACCESS_KEY
+
+3. The pipeline status can be checked in the GitHub Actions tab.
 
 ## API Endpoints
 
