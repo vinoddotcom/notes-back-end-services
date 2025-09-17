@@ -10,3 +10,4 @@ python-multipart==0.0.7
 pytest==7.4.3
 httpx==0.24.1
 alembic==1.12.1
+email-validator==2.1.1
