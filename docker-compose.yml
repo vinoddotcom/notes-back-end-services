@@ -1,0 +1,36 @@
+# Docker Compose file for Notes API application
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # If using Aurora, set USE_AURORA to true
+      - USE_AURORA=true
+      - AURORA_WRITER_ENDPOINT=${AURORA_WRITER_ENDPOINT}
+      - AURORA_READER_ENDPOINT=${AURORA_READER_ENDPOINT}
+      - AURORA_PORT=${AURORA_PORT:-5432}
+      - AURORA_USER=${AURORA_USER}
+      - AURORA_PASSWORD=${AURORA_PASSWORD}
+      - AURORA_DB=${AURORA_DB}
+      # JWT Secret key
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-for-jwt-please-change-in-production}
+      # Fallback for local development if not using Aurora
+      - POSTGRES_SERVER=${POSTGRES_SERVER:-localhost}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-notes_db}
+    volumes:
+      - ./app:/app/app
+      - ./alembic:/app/alembic
+    command: ["/app/docker-entrypoint.sh"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped

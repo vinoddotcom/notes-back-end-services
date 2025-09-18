@@ -1,0 +1,90 @@
+{
+  "family": "notes-api-backend",
+  "executionRoleArn": "arn:aws:iam::587294124303:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::587294124303:role/ecsTaskRole",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "backend",
+      "image": "587294124303.dkr.ecr.ap-south-1.amazonaws.com/notes-app/backend-services:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "hostPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "ENVIRONMENT",
+          "value": "production"
+        },
+        {
+          "name": "AURORA_WRITER_ENDPOINT",
+          "value": "notes-database-manual.cluster-cx4sswi0qr5a.ap-south-1.rds.amazonaws.com"
+        },
+        {
+          "name": "AURORA_READER_ENDPOINT",
+          "value": "notes-database-manual.cluster-ro-cx4sswi0qr5a.ap-south-1.rds.amazonaws.com"
+        },
+        {
+          "name": "AURORA_PORT",
+          "value": "5432"
+        },
+        {
+          "name": "AURORA_USER",
+          "value": "postgres"
+        },
+        {
+          "name": "AURORA_PASSWORD",
+          "value": "9936975307Vy"
+        },
+        {
+          "name": "AURORA_DB",
+          "value": "postgres"
+        },
+        {
+          "name": "USE_AURORA",
+          "value": "true"
+        },
+        {
+          "name": "SECRET_KEY",
+          "value": "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+        },
+        {
+          "name": "ALGORITHM",
+          "value": "HS256"
+        },
+        {
+          "name": "ACCESS_TOKEN_EXPIRE_MINUTES",
+          "value": "30"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/notes-api-backend",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group": "true"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512",
+  "tags": [
+    {
+      "key": "Project",
+      "value": "notes-api"
+    },
+    {
+      "key": "Environment",
+      "value": "prod"
+    }
+  ]
+}

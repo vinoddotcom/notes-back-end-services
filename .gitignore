@@ -58,6 +58,7 @@ venv.bak/
 .vscode/
 *.swp
 *.swo
+.env.docker
 
 # Alembic revisions
 # Uncomment if you want to track migrations

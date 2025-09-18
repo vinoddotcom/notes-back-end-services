@@ -1,9 +1,14 @@
 from logging.config import fileConfig
+import os
+from dotenv import load_dotenv
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+
+# Load environment variables from .env file
+load_dotenv()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -27,6 +32,8 @@ target_metadata = Base.metadata
 # ... etc.
 from app.core.config import settings
 
+# Always use the writer endpoint for migrations
+# Using writer endpoint is critical as schema changes must go to the primary instance
 config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URI)
 
 

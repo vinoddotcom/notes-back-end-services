@@ -163,19 +163,53 @@ API documentation (Swagger UI) will be available at `http://localhost:8000/docs`
 pytest
 ```
 
-### Containerization
+### Docker Deployment
 
-Build the Docker image:
+#### Running with Docker Compose
+
+The application can be run using Docker Compose, which sets up the application with the correct environment variables:
+
+1. Make sure your `.env` file is properly configured with either PostgreSQL or Aurora connection details.
+
+2. Build and start the containers:
+
+```bash
+docker compose up --build
+```
+
+Or use the provided helper script:
+
+```bash
+./scripts/docker_run.sh --build --logs
+```
+
+The API will be available at `http://localhost:8000`
+
+#### Running with Docker (standalone)
+
+1. Build the Docker image:
 
 ```bash
 docker build -t notes-backend .
 ```
 
-Run the container:
+2. Run the container with appropriate environment variables:
 
 ```bash
-docker run -p 8000:8000 -e DATABASE_URL=postgres://user:pass@host/db -e SECRET_KEY=mysecretkey notes-backend
+# For AWS Aurora
+docker run -p 8000:8000 \
+  -e USE_AURORA=true \
+  -e AURORA_WRITER_ENDPOINT=your-cluster-name.cluster-abcdefghijkl.region.rds.amazonaws.com \
+  -e AURORA_READER_ENDPOINT=your-cluster-name.cluster-ro-abcdefghijkl.region.rds.amazonaws.com \
+  -e AURORA_PORT=5432 \
+  -e AURORA_USER=postgres \
+  -e AURORA_PASSWORD=your-secure-password \
+  -e AURORA_DB=notes_db \
+  -e SECRET_KEY=your-secret-key \
+  notes-backend
 ```
+
+For detailed Docker setup instructions, see [Docker Setup Documentation](./docs/docker_setup.md).
 
 ### CI/CD Pipeline
 
