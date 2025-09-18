@@ -121,7 +121,7 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
-      - name: Get security group for ECS tasks
+      - name: Get security group for ECS tasksyyy
         run: |
           SECURITY_GROUP_ID=$(aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }} \
             --query 'services[0].networkConfiguration.awsvpcConfiguration.securityGroups[0]' --output text)

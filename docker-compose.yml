@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     environment:
       # If using Aurora, set USE_AURORA to true
-      - USE_AURORA=true
+      - USE_AURORA=${USE_AURORA:-true}
       - AURORA_WRITER_ENDPOINT=${AURORA_WRITER_ENDPOINT}
       - AURORA_READER_ENDPOINT=${AURORA_READER_ENDPOINT}
       - AURORA_PORT=${AURORA_PORT:-5432}
@@ -17,20 +17,53 @@ services:
       - AURORA_PASSWORD=${AURORA_PASSWORD}
       - AURORA_DB=${AURORA_DB}
       # JWT Secret key
-      - SECRET_KEY=${SECRET_KEY:-your-secret-key-for-jwt-please-change-in-production}
+      - SECRET_KEY=${SECRET_KEY:-09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7}
+      - ALGORITHM=${ALGORITHM:-HS256}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
       # Fallback for local development if not using Aurora
-      - POSTGRES_SERVER=${POSTGRES_SERVER:-localhost}
+      - POSTGRES_SERVER=${POSTGRES_SERVER:-db}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-      - POSTGRES_DB=${POSTGRES_DB:-notes_db}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+    depends_on:
+      - db
+    networks:
+      - app-network
     volumes:
       - ./app:/app/app
       - ./alembic:/app/alembic
     command: ["/app/docker-entrypoint.sh"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
     restart: unless-stopped
+
+  # Database service for local development
+  # Will be ignored in production if USE_AURORA=true
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # Don't start this service if we're using Aurora
+    profiles:
+      - ${USE_POSTGRES_SERVICE:-default}
+
+networks:
+  app-network:
+
+volumes:
+  postgres_data:
