@@ -59,6 +59,7 @@ venv.bak/
 *.swp
 *.swo
 .env.docker
+policies
 
 # Alembic revisions
 # Uncomment if you want to track migrations
