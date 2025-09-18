@@ -64,6 +64,13 @@ jobs:
           task-definition: task-definition.json
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          
+      - name: Ensure CloudWatch log configuration is correct
+        run: |
+          # Add awslogs-create-group option to log configuration if missing
+          jq '.containerDefinitions[0].logConfiguration.options["awslogs-create-group"] = "true"' \
+            ${{ steps.task-def.outputs.task-definition }} > updated-task-definition.json
+          cp updated-task-definition.json ${{ steps.task-def.outputs.task-definition }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -72,6 +79,7 @@ jobs:
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+          force-new-deployment: true
           
       - name: Post-deployment verification
         run: |
