@@ -18,8 +18,56 @@ permissions:
   id-token: write
 
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run tests
+        run: |
+          chmod +x run_tests.sh
+          
+          # Run tests with coverage
+          export CI=true
+          ./run_tests.sh
+          
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+          
+          
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            coverage.xml
+            .coverage
+            htmlcov/
+          retention-days: 7
+
+
   build-push-deploy:
     name: Build, Push and Deploy
+    needs: test
     runs-on: ubuntu-latest
     
     steps:
