@@ -23,19 +23,12 @@ COPY run.py .
 COPY scripts/docker-entrypoint.sh /app/docker-entrypoint.sh
 RUN chmod +x /app/docker-entrypoint.sh
 
-# Create a non-root user and set permissions
-RUN adduser --disabled-password --gecos '' appuser && \
-    chown -R appuser:appuser /app
-
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV PORT=8000
 
 # Expose the port the app runs on
 EXPOSE 8000
-
-# Switch to non-root user
-USER appuser
 
 # Command to run the application
 CMD ["/app/docker-entrypoint.sh"]

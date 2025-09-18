@@ -261,3 +261,80 @@ def delete_note(
     db.delete(note)
     db.commit()
     return {"message": "Note deleted successfully"}
+
+
+@router.get(
+    "/by-user/{user_id}", 
+    response_model=PaginatedResponse[NoteResponse],
+    summary="List Notes by User (Admin Only)",
+    description="Get paginated list of notes for a specific user. Admin access only.",
+    responses={
+        200: {"description": "List of notes retrieved successfully"},
+        401: {"description": "Not authenticated"},
+        403: {"description": "Permission denied - admin access required"},
+        404: {"description": "User not found"}
+    }
+)
+def get_notes_by_user(
+    user_id: int = Path(..., title="User ID", description="The ID of the user whose notes to retrieve"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+    page: int = Query(1, gt=0, description="Page number, starting from 1"),
+    size: int = Query(10, gt=0, le=100, description="Number of items per page (max 100)")
+) -> Any:
+    """
+    Get paginated notes for a specific user (Admin only).
+    
+    - **user_id**: The ID of the user whose notes to retrieve
+    - **page**: Page number (starting from 1)
+    - **size**: Number of items per page (max 100)
+    
+    Returns:
+    - Paginated list of notes with pagination metadata
+    
+    Notes:
+    - Requires admin role
+    """
+    # Check if user is admin
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permission denied - admin access required"
+        )
+    
+    # Check if the user exists - this is an optional check that could be removed
+    # if you don't want to expose whether a user ID exists or not
+    user_exists = db.query(User).filter(User.id == user_id).first()
+    if not user_exists:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Build query for the specific user's notes
+    query = db.query(Note).filter(Note.owner_id == user_id)
+    
+    # Calculate total for pagination
+    total = query.count()
+    
+    # Calculate pages
+    total_pages = math.ceil(total / size) if total > 0 else 1
+    
+    # Ensure page is within bounds
+    page = min(page, total_pages) if total > 0 else 1
+    
+    # Calculate offset
+    offset = (page - 1) * size
+    
+    # Get paginated results
+    notes = query.order_by(Note.created_at.desc()).offset(offset).limit(size).all()
+    
+    # Create pagination metadata
+    pagination_meta = PaginationMeta(
+        total=total,
+        page=page,
+        size=size,
+        pages=total_pages
+    )
+    
+    return {"items": notes, "meta": pagination_meta}
