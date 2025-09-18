@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class NoteBase(BaseModel):
-    title: str = Field(..., min_length=1, max_length=200)
-    description: Optional[str] = None
+    title: str = Field(..., min_length=1, max_length=200, description="Title of the note")
+    description: Optional[str] = Field(None, description="Content of the note")
 
 
 class NoteCreate(NoteBase):
@@ -18,10 +18,9 @@ class NoteUpdate(NoteBase):
 
 
 class NoteResponse(NoteBase):
-    id: int
-    owner_id: int
-    created_at: datetime
-    updated_at: datetime
+    id: int = Field(..., description="Unique note identifier")
+    owner_id: int = Field(..., description="ID of the user who owns this note")
+    created_at: datetime = Field(..., description="When the note was created")
+    updated_at: datetime = Field(..., description="When the note was last updated")
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

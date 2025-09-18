@@ -70,14 +70,26 @@ def test_get_user_notes(client: TestClient, db: Session):
     assert response.status_code == 200
     
     data = response.json()
-    assert isinstance(data, list)
-    assert len(data) == 2
+    # Check for paginated response structure
+    assert "items" in data
+    assert "meta" in data
+    assert data["meta"]["total"] == 2
     
-    # Check the notes data
-    assert data[0]["title"] == "Note 1"
-    assert data[0]["description"] == "Description 1"
-    assert data[1]["title"] == "Note 2"
-    assert data[1]["description"] == "Description 2"
+    # Check the notes data in items array
+    notes = data["items"]
+    assert len(notes) == 2
+    
+    # The notes may be in reverse order due to sorting by created_at desc
+    note_titles = [note["title"] for note in notes]
+    assert "Note 1" in note_titles
+    assert "Note 2" in note_titles
+    
+    # Check descriptions
+    for note in notes:
+        if note["title"] == "Note 1":
+            assert note["description"] == "Description 1"
+        elif note["title"] == "Note 2":
+            assert note["description"] == "Description 2"
 
 
 def test_get_note_by_id(client: TestClient, db: Session):
