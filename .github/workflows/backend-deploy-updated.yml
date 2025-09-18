@@ -120,6 +120,7 @@ jobs:
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+          force-new-deployment: true
 
       - name: Get security group for ECS tasksyyy
         run: |

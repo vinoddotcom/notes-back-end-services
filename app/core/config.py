@@ -44,12 +44,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # CORS settings
-    ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:3000", 
-        "http://localhost:8000", 
-        "https://notes.vinod.digital", 
-        "https://api.vinod.digital"
-    ]
+    ALLOWED_ORIGINS: List[str] = ["*"]  # Allow any origin including localhost with any port
     
     # Model config using newer pydantic v2 syntax
     model_config = SettingsConfigDict(case_sensitive=True)
